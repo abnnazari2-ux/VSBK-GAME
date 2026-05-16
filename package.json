@@ -1,0 +1,13 @@
+{
+  "name": "snooker-legends",
+  "version": "1.0.0",
+  "description": "Snooker Legends - Full-stack multiplayer snooker game",
+  "scripts": {
+    "dev": "concurrently -n CLIENT,SERVER -c blue,green \"cd client && npm run dev\" \"cd server && npm run dev\"",
+    "build": "cd client && npm run build",
+    "postinstall": "cd client && npm install && cd ../server && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
