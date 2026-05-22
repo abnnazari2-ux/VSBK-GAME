@@ -10,11 +10,6 @@ import {
 } from './rooms';
 import { createInitialGameState } from './gameState';
 
-function getNextPlayer(currentPlayer: string, playerIds: string[]): string {
-  const idx = playerIds.indexOf(currentPlayer);
-  return playerIds[(idx + 1) % playerIds.length];
-}
-
 export function setupSocketHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
     console.log(`[Socket] Connected: ${socket.id}`);
@@ -36,7 +31,6 @@ export function setupSocketHandlers(io: Server): void {
           hostId: socket.id,
           settings: data.settings,
         });
-
         const hostPlayer: Player = {
           id: socket.id,
           name: data.playerName || 'Player 1',
@@ -47,7 +41,6 @@ export function setupSocketHandlers(io: Server): void {
           score: 0,
           currentBreak: 0,
         };
-
         room.players.set(socket.id, hostPlayer);
         socket.join(room.code);
         socket.emit('room_created', { room: getRoomSerialized(room) });
@@ -67,7 +60,6 @@ export function setupSocketHandlers(io: Server): void {
         if (room.isPrivate && room.password && room.password !== data.password) {
           socket.emit('error', { message: 'Incorrect password' }); return;
         }
-
         const newPlayer: Player = {
           id: socket.id,
           name: data.playerName || 'Player 2',
@@ -78,10 +70,8 @@ export function setupSocketHandlers(io: Server): void {
           score: 0,
           currentBreak: 0,
         };
-
         room.players.set(socket.id, newPlayer);
         socket.join(room.code);
-
         const serialized = getRoomSerialized(room);
         socket.emit('room_joined', { room: serialized });
         io.to(room.code).emit('player_joined', { room: serialized, player: newPlayer });
@@ -114,18 +104,15 @@ export function setupSocketHandlers(io: Server): void {
         if (!room) { socket.emit('error', { message: 'Room not found' }); return; }
         if (room.host !== socket.id) { socket.emit('error', { message: 'Only host can start' }); return; }
         if (room.players.size < 2) { socket.emit('error', { message: 'Need 2 players' }); return; }
-
         for (const [, p] of room.players) {
           if (!p.isHost && !p.isReady) {
             socket.emit('error', { message: `${p.name} is not ready` }); return;
           }
         }
-
         const playerIds = Array.from(room.players.keys());
         const gameState = createInitialGameState(room.code, playerIds, room.settings.frames);
         room.gameState = gameState;
         room.status = 'playing';
-
         io.to(room.code).emit('match_started', { gameState, room: getRoomSerialized(room) });
         console.log(`[Match] Started in ${room.code}`);
       } catch (err: any) {
@@ -133,18 +120,16 @@ export function setupSocketHandlers(io: Server): void {
       }
     });
 
+    // Relay shot to opponent — client enforces whose turn it is
     socket.on('shot_taken', (data: { roomCode: string; power: number; angle: number; spin: { x: number; y: number } }) => {
       try {
         const room = getRoom(data.roomCode);
-        if (!room || !room.gameState) return;
-        if (room.gameState.currentPlayer !== socket.id) {
-          socket.emit('error', { message: 'Not your turn' }); return;
-        }
-        io.to(room.code).emit('shot_broadcast', {
+        if (!room) return;
+        socket.to(room.code).emit('shot_broadcast', {
           playerId: socket.id,
           power: data.power,
           angle: data.angle,
-          spin: data.spin,
+          spin: data.spin ?? { x: 0, y: 0 },
           timestamp: Date.now(),
         });
       } catch (err: any) {
@@ -152,10 +137,11 @@ export function setupSocketHandlers(io: Server): void {
       }
     });
 
+    // Any player in the room can sync state (not just the host)
     socket.on('sync_game_state', (data: { roomCode: string; gameState: any }) => {
       try {
         const room = getRoom(data.roomCode);
-        if (!room || room.host !== socket.id) return;
+        if (!room || !room.players.has(socket.id)) return;
         room.gameState = { ...data.gameState, timestamp: Date.now() };
         socket.to(room.code).emit('game_state_synced', { gameState: room.gameState });
       } catch (err: any) {
@@ -168,15 +154,7 @@ export function setupSocketHandlers(io: Server): void {
         const room = getRoom(data.roomCode);
         if (!room || !room.gameState) return;
         if (data.gameState) room.gameState = { ...room.gameState, ...data.gameState, timestamp: Date.now() };
-        const playerIds: string[] = room.gameState.players;
-        const nextPlayer = getNextPlayer(room.gameState.currentPlayer, playerIds);
-        room.gameState.currentPlayer = nextPlayer;
-        if (room.gameState.breaks) room.gameState.breaks[socket.id] = 0;
-        io.to(room.code).emit('turn_ended', {
-          gameState: room.gameState,
-          previousPlayer: socket.id,
-          currentPlayer: nextPlayer,
-        });
+        io.to(room.code).emit('turn_ended', { gameState: room.gameState, previousPlayer: socket.id });
       } catch (err: any) {
         socket.emit('error', { message: err.message });
       }
@@ -230,26 +208,21 @@ export function setupSocketHandlers(io: Server): void {
 function handleLeaveRoom(socket: Socket, io: Server, roomCode: string): void {
   const room = getRoom(roomCode);
   if (!room) return;
-
   const leavingPlayer = room.players.get(socket.id);
   const wasHost = leavingPlayer?.isHost ?? false;
-
   room.players.delete(socket.id);
   room.spectators.delete(socket.id);
   socket.leave(roomCode);
-
   if (room.players.size === 0 && room.spectators.size === 0) {
     deleteRoom(roomCode);
     return;
   }
-
   if (wasHost && room.players.size > 0) {
     const [newHostId, newHostPlayer] = room.players.entries().next().value;
     newHostPlayer.isHost = true;
     newHostPlayer.isReady = true;
     room.host = newHostId;
   }
-
   io.to(roomCode).emit('player_left', {
     room: getRoomSerialized(room),
     playerId: socket.id,
