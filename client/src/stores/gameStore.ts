@@ -19,7 +19,7 @@ interface AppState {
 export const useGameStore = create<AppState>((set) => ({
   localPlayer: {
     id: '',
-    name: 'ChalkMaster',
+    name: 'NAZARI',
     rank: 'Grand Master',
     level: 45,
     isHost: false,

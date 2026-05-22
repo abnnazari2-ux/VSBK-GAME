@@ -40,6 +40,7 @@ export function useSocket() {
     socket.on('match_started', (payload: { room: Room; gameState: any }) => {
       setCurrentRoom(payload.room);
       setGameState(payload.gameState);
+      window.dispatchEvent(new CustomEvent('snooker:match_started', { detail: payload }));
     });
 
     socket.on('shot_broadcast', (payload: any) => {
@@ -50,14 +51,26 @@ export function useSocket() {
     socket.on('turn_ended', (payload: { gameState: any }) => setGameState(payload.gameState));
 
     socket.on('match_ended', (payload: { winner: string; finalState: any }) => {
-      setGameState(payload.finalState);
+      const fs = payload.finalState;
+      setGameState(fs);
+      const winnerIdx: 0 | 1 = typeof fs?.winner === 'number' ? fs.winner : 0;
+      const loserIdx: 0 | 1 = winnerIdx === 0 ? 1 : 0;
       setMatchResult({
         winner: payload.winner,
+        loser: fs?.playerNames?.[loserIdx] ?? 'Opponent',
+        winnerScore: fs?.scores?.[winnerIdx] ?? 0,
+        loserScore: fs?.scores?.[loserIdx] ?? 0,
         stats: {
-          potSuccess: 73, safetySuccess: 85, longestBreak: 67,
-          avgShotTime: 24, fouls: 2, accuracy: 78, totalPoints: 120,
+          potSuccess: 73,
+          safetySuccess: 85,
+          longestBreak: fs?.currentBreaks?.[winnerIdx] ?? 67,
+          avgShotTime: 24,
+          fouls: 2,
+          accuracy: 78,
+          totalPoints: fs?.scores?.[winnerIdx] ?? 120,
         },
-      });
+      } as any);
+      window.dispatchEvent(new CustomEvent('snooker:match_ended', { detail: payload }));
     });
 
     socket.on('chat_message', (payload: { message: ChatMessage }) => {

@@ -18,7 +18,7 @@ export default function Dashboard() {
         <div style={{ width: 300, flexShrink: 0, background: 'rgba(8,8,14,0.98)', borderRight: '1px solid rgba(212,175,55,0.15)', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
             <p style={{ ...S, fontWeight: 600, fontSize: 11, color: '#6b7280', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>WELCOME BACK,</p>
-            <h1 style={{ ...S, fontWeight: 900, fontSize: 44, color: '#d4af37', lineHeight: 1, letterSpacing: '0.02em', textShadow: '0 0 30px rgba(212,175,55,0.3)' }}>CHALKMASTER</h1>
+            <h1 style={{ ...S, fontWeight: 900, fontSize: 44, color: '#d4af37', lineHeight: 1, letterSpacing: '0.02em', textShadow: '0 0 30px rgba(212,175,55,0.3)' }}>NAZARI</h1>
             <div style={{ height: 2, background: 'linear-gradient(90deg, #d4af37 60%, transparent)', margin: '10px 0' }} />
             <p style={{ ...S, fontSize: 13, color: '#6b7280', fontStyle: 'italic', lineHeight: 1.6 }}>EVERY SHOT. EVERY VICTORY.<br />BECOME A LEGEND.</p>
           </div>

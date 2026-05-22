@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trophy, Target, TrendingUp, Star, RotateCcw, Home, ChevronRight } from 'lucide-react';
@@ -12,27 +11,29 @@ export default function Results() {
   const navigate = useNavigate();
   const { matchResult, localPlayer } = useGameStore();
 
-  const result = matchResult ?? {
-    winner: localPlayer.name,
-    loser: 'BreakBuilder',
-    winnerScore: 3,
-    loserScore: 1,
-    frames: [
+  // Build a safe result object that works whether matchResult is real or null
+  const mr = matchResult as any;
+  const result = {
+    winner: mr?.winner ?? localPlayer.name,
+    loser: mr?.loser ?? 'BreakBuilder',
+    winnerScore: mr?.winnerScore ?? 3,
+    loserScore: mr?.loserScore ?? 1,
+    frames: mr?.frames ?? [
       { winner: localPlayer.name, scores: [87, 34] },
       { winner: 'BreakBuilder', scores: [45, 112] },
       { winner: localPlayer.name, scores: [78, 21] },
       { winner: localPlayer.name, scores: [66, 43] },
     ],
     stats: {
-      highestBreak: 87,
-      totalPoints: 276,
-      accuracy: 72,
-      fouls: 2,
-      longestStreak: 5,
+      highestBreak: mr?.stats?.longestBreak ?? mr?.stats?.highestBreak ?? 87,
+      totalPoints: mr?.stats?.totalPoints ?? 276,
+      accuracy: mr?.stats?.accuracy ?? 72,
+      fouls: mr?.stats?.fouls ?? 2,
+      longestStreak: mr?.stats?.longestStreak ?? 5,
     },
-    rankChange: +18,
-    xpGained: 450,
-    coinsEarned: 120,
+    rankChange: mr?.rankChange ?? 18,
+    xpGained: mr?.xpGained ?? 450,
+    coinsEarned: mr?.coinsEarned ?? 120,
   };
 
   const isWinner = result.winner === localPlayer.name;
@@ -88,21 +89,23 @@ export default function Results() {
           </div>
 
           {/* Frame breakdown */}
-          <div className="mt-6 pt-5 border-t border-white/10">
-            <p className="text-gray-400 text-sm mb-3">Frame Breakdown</p>
-            <div className="flex gap-2 flex-wrap justify-center">
-              {result.frames.map((f: any, i: number) => (
-                <div key={i} className="text-center">
-                  <div className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center text-xs font-bold ${
-                    f.winner === result.winner ? 'bg-green-600/20 text-green-400 border border-green-600/30' : 'bg-white/5 text-gray-400'
-                  }`}>
-                    <span>F{i + 1}</span>
-                    <span>{f.scores.join('-')}</span>
+          {result.frames.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-white/10">
+              <p className="text-gray-400 text-sm mb-3">Frame Breakdown</p>
+              <div className="flex gap-2 flex-wrap justify-center">
+                {result.frames.map((f: any, i: number) => (
+                  <div key={i} className="text-center">
+                    <div className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center text-xs font-bold ${
+                      f.winner === result.winner ? 'bg-green-600/20 text-green-400 border border-green-600/30' : 'bg-white/5 text-gray-400'
+                    }`}>
+                      <span>F{i + 1}</span>
+                      <span>{Array.isArray(f.scores) ? f.scores.join('-') : '—'}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Stats + Rewards Row */}
@@ -116,8 +119,8 @@ export default function Results() {
             </div>
             <div className="space-y-3">
               {[
-                ['Highest Break', result.stats.highestBreak, 'pts'],
-                ['Total Points', result.stats.totalPoints, 'pts'],
+                ['Highest Break', result.stats.highestBreak, ' pts'],
+                ['Total Points', result.stats.totalPoints, ' pts'],
                 ['Shot Accuracy', result.stats.accuracy, '%'],
                 ['Fouls', result.stats.fouls, ''],
                 ['Longest Streak', result.stats.longestStreak, ' pots'],
@@ -179,7 +182,7 @@ export default function Results() {
         {/* Actions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
           className="flex gap-4 justify-center">
-          <GreenButton onClick={() => navigate('/match-setup')} size="lg">
+          <GreenButton onClick={() => navigate('/play')} size="lg">
             <RotateCcw size={18} /> Play Again
           </GreenButton>
           <GoldButton onClick={() => navigate('/')} size="lg">

@@ -25,6 +25,13 @@ export default function Lobby() {
     if (!currentRoom) navigate('/');
   }, [currentRoom, navigate]);
 
+  // Navigate when server confirms match has started (both host and guest)
+  useEffect(() => {
+    const handler = () => navigate('/game');
+    window.addEventListener('snooker:match_started', handler);
+    return () => window.removeEventListener('snooker:match_started', handler);
+  }, [navigate]);
+
   const handleReady = () => {
     setIsReady(v => !v);
     setReady({ roomCode: currentRoom?.code });
@@ -32,7 +39,7 @@ export default function Lobby() {
 
   const handleStart = () => {
     startMatch({ roomCode: currentRoom?.code });
-    navigate('/game');
+    // Navigation happens via the snooker:match_started event for all players
   };
 
   const handleLeave = () => {
@@ -135,9 +142,9 @@ export default function Lobby() {
                 <h3 className="font-semibold text-white mb-3" style={{ fontFamily: 'Rajdhani' }}>Match Settings</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    ['Format', `Best of ${currentRoom?.settings?.maxFrames ?? 3}`],
+                    ['Format', `Best of ${currentRoom?.settings?.maxFrames ?? currentRoom?.settings?.frames ?? 3}`],
                     ['Timer', currentRoom?.settings?.turnTimer ? `${currentRoom.settings.turnTimer}s` : 'No Limit'],
-                    ['Theme', currentRoom?.settings?.theme ?? 'Classic'],
+                    ['Theme', currentRoom?.settings?.theme ?? currentRoom?.settings?.tableTheme ?? 'Classic'],
                   ].map(([k, v]) => (
                     <div key={k} className="text-center bg-white/5 rounded-lg p-3">
                       <p className="text-gray-400 text-xs mb-1">{k}</p>

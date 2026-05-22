@@ -217,6 +217,14 @@ export default function GameScreen() {
     return () => window.removeEventListener('snooker:shot_broadcast', handler);
   }, [animate, isMultiplayer]);
 
+  // ── OPPONENT MATCH-END LISTENER (so opponent also navigates to /results) ──
+  useEffect(() => {
+    if (!isMultiplayer) return;
+    const handler = () => setTimeout(() => navigate('/results'), 1800);
+    window.addEventListener('snooker:match_ended', handler);
+    return () => window.removeEventListener('snooker:match_ended', handler);
+  }, [isMultiplayer, navigate]);
+
   // ── SIDE EFFECTS ───────────────────────────────────────────────────────────
   useEffect(() => { draw(); }, [draw]);
   useEffect(() => () => cancelAnimationFrame(animRef.current), []);
