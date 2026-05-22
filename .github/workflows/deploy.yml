@@ -1,0 +1,17 @@
+name: Deploy to Replit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Replit Deploy
+        run: |
+          curl -X POST https://vsbk-game.replit.app/deploy \
+            -H "Content-Type: application/json" \
+            -H "x-deploy-secret: ${{ secrets.DEPLOY_SECRET }}" \
+            -d '{}'
