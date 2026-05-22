@@ -14,7 +14,7 @@ export default function GameScreen() {
   const engineRef = useRef<EngineState | null>(null);
 
   const [engineState, setEngineState] = useState<EngineState>(() => {
-    const s = createEngineState('ChalkMaster', 'BreakBuilder');
+    const s = createEngineState('NAZARI', 'BreakBuilder');
     ballsRef.current = s.balls.map(b => ({ ...b }));
     engineRef.current = s;
     return s;
@@ -235,7 +235,7 @@ export default function GameScreen() {
               <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
                 {[
                   { label:'RESUME', bg:'linear-gradient(135deg,#1a5c32,#22c55e)', color:'#fff', onClick:()=>setIsPaused(false) },
-                  { label:'RESTART', bg:'rgba(255,255,255,0.05)', color:'#f0f0f0', onClick:()=>{ const s=createEngineState('ChalkMaster','BreakBuilder'); ballsRef.current=s.balls.map(b=>({...b})); engineRef.current=s; setEngineState(s); setIsPaused(false); setTimer(30); } },
+                  { label:'RESTART', bg:'rgba(255,255,255,0.05)', color:'#f0f0f0', onClick:()=>{ const s=createEngineState('NAZARI','BreakBuilder'); ballsRef.current=s.balls.map(b=>({...b})); engineRef.current=s; setEngineState(s); setIsPaused(false); setTimer(30); } },
                   { label:'FORFEIT', bg:'rgba(127,29,29,0.7)', color:'#fca5a5', onClick:()=>navigate('/results') },
                 ].map(b=>(
                   <button key={b.label} onClick={b.onClick} style={{ fontFamily:'Rajdhani,sans-serif', fontWeight:700, fontSize:14, padding:'12px', background:b.bg, color:b.color, border:'none', borderRadius:8, cursor:'pointer', letterSpacing:'0.08em' }}>{b.label}</button>
