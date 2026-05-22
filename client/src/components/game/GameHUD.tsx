@@ -22,6 +22,7 @@ interface Props {
   onToggleAimLine?: () => void;
   showAimLine?: boolean;
   timerSeconds?: number;
+  frameScores?: [number, number];
 }
 
 function getPowerColor(p: number) {
@@ -40,6 +41,7 @@ export default function GameHUD({
   remainingBalls,
   onPause, onForfeit, onToggleAimLine, showAimLine,
   timerSeconds = 30,
+  frameScores,
 }: Props) {
   const [forfeitOpen, setForfeitOpen] = useState(false);
   const pct = Math.min(100, Math.max(0, shotPower));
@@ -81,8 +83,16 @@ export default function GameHUD({
         </motion.div>
 
         {/* Center */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
           <span style={{ fontFamily: 'Playfair Display,serif', fontWeight: 700, fontSize: '11px', color: '#6b7280', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Frame {frame}</span>
+          {/* Frame scores */}
+          {frameScores && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 900, fontSize: '13px', color: '#d4af37' }}>{frameScores[0]}</span>
+              <span style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '10px', color: '#4b5563', letterSpacing: '0.06em' }}>FRAMES</span>
+              <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 900, fontSize: '13px', color: '#f0f0f0' }}>{frameScores[1]}</span>
+            </div>
+          )}
           <motion.div
             animate={isUrgent ? { scale: [1, 1.05, 1] } : { scale: 1 }}
             transition={isUrgent ? { duration: 0.65, repeat: Infinity } : undefined}
@@ -90,7 +100,7 @@ export default function GameHUD({
           >
             <Clock size={12} color={isUrgent ? '#ef4444' : '#6b7280'} />
             <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 700, fontSize: '18px', color: isUrgent ? '#ef4444' : '#d4af37' }}>
-              {String(Math.floor(timerSeconds/60)).padStart(2,'0')}:{String(timerSeconds%60).padStart(2,'0')}
+              {String(Math.floor(timerSeconds / 60)).padStart(2, '0')}:{String(timerSeconds % 60).padStart(2, '0')}
             </span>
           </motion.div>
           <div style={{ padding: '3px 12px', borderRadius: '999px', background: 'rgba(26,122,60,0.2)', border: '1px solid rgba(34,197,94,0.3)' }}>
@@ -134,7 +144,6 @@ export default function GameHUD({
           </div>
         </div>
 
-        {/* Divider */}
         <div style={{ width: '1px', height: '60px', background: 'rgba(212,175,55,0.15)' }} />
 
         {/* Ball tray */}
@@ -149,19 +158,18 @@ export default function GameHUD({
           </div>
         </div>
 
-        {/* Divider */}
         <div style={{ width: '1px', height: '60px', background: 'rgba(212,175,55,0.15)' }} />
 
-        {/* Buttons */}
+        {/* Controls */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {onToggleAimLine && (
             <button onClick={onToggleAimLine} style={{ ...btnBase, background: showAimLine ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.05)', color: showAimLine ? '#d4af37' : '#6b7280', border: `1px solid ${showAimLine ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.1)'}` }}>
-              {showAimLine ? <Eye size={13}/> : <EyeOff size={13}/>} AIM LINE
+              {showAimLine ? <Eye size={13} /> : <EyeOff size={13} />} AIM LINE
             </button>
           )}
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={onPause} style={{ ...btnBase, background: 'rgba(17,17,24,0.9)', color: '#d4af37', border: '1px solid rgba(212,175,55,0.3)' }}><Pause size={13}/>PAUSE</button>
-            <button onClick={() => setForfeitOpen(true)} style={{ ...btnBase, background: 'rgba(127,29,29,0.7)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)' }}><Flag size={13}/>FORFEIT</button>
+            <button onClick={onPause} style={{ ...btnBase, background: 'rgba(17,17,24,0.9)', color: '#d4af37', border: '1px solid rgba(212,175,55,0.3)' }}><Pause size={13} />PAUSE</button>
+            <button onClick={() => setForfeitOpen(true)} style={{ ...btnBase, background: 'rgba(127,29,29,0.7)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)' }}><Flag size={13} />FORFEIT</button>
           </div>
         </div>
       </div>

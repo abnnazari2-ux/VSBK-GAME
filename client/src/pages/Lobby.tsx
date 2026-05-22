@@ -26,18 +26,17 @@ export default function Lobby() {
   }, [currentRoom, navigate]);
 
   const handleReady = () => {
-    const next = !isReady;
-    setIsReady(next);
-    setReady(next);
+    setIsReady(v => !v);
+    setReady({ roomCode: currentRoom?.code });
   };
 
   const handleStart = () => {
-    startMatch();
+    startMatch({ roomCode: currentRoom?.code });
     navigate('/game');
   };
 
   const handleLeave = () => {
-    leaveRoom();
+    leaveRoom({ roomCode: currentRoom?.code });
     navigate('/');
   };
 
@@ -50,12 +49,12 @@ export default function Lobby() {
   };
 
   const sendChat = () => {
-    if (!chatInput.trim()) return;
-    sendChatMessage(chatInput.trim());
+    if (!chatInput.trim() || !currentRoom?.code) return;
+    sendChatMessage({ roomCode: currentRoom.code, message: chatInput.trim() });
     setChatInput('');
   };
 
-  const messages = currentRoom?.messages ?? [];
+  const messages = currentRoom?.chat ?? [];
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-dark)' }}>
@@ -97,9 +96,8 @@ export default function Lobby() {
                   {[0, 1].map(idx => {
                     const p = players[idx];
                     return (
-                      <motion.div key={idx} className={`rounded-xl p-5 text-center transition-all ${
-                        p ? 'bg-white/5' : 'border-2 border-dashed border-white/10'
-                      }`}
+                      <motion.div key={idx}
+                        className={`rounded-xl p-5 text-center transition-all ${ p ? 'bg-white/5' : 'border-2 border-dashed border-white/10' }`}
                         animate={p?.isReady ? { boxShadow: '0 0 20px rgba(34,197,94,0.3)' } : {}}>
                         {p ? (
                           <>
@@ -111,9 +109,7 @@ export default function Lobby() {
                               <span className="font-bold text-white" style={{ fontFamily: 'Rajdhani', fontSize: '1.1rem' }}>{p.name}</span>
                             </div>
                             <p className="text-gray-400 text-sm mb-3">{p.rank} · Lv {p.level}</p>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                              p.isReady ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-                            }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${ p.isReady ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400' }`}>
                               {p.isReady ? 'READY' : 'NOT READY'}
                             </span>
                           </>
@@ -133,7 +129,7 @@ export default function Lobby() {
                 </div>
 
                 <div className="mt-6 pt-5 border-t border-white/10 flex gap-3">
-                  <GreenButton onClick={handleReady} className="flex-1" variant={isReady ? 'outlined' : 'solid'}>
+                  <GreenButton onClick={handleReady} className="flex-1" outlined={isReady}>
                     <Shield size={16} /> {isReady ? 'Cancel Ready' : 'Ready Up'}
                   </GreenButton>
                   {isHost && (
@@ -170,13 +166,11 @@ export default function Lobby() {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 <AnimatePresence>
-                  {messages.map((m, i) => (
+                  {messages.map((m: any, i: number) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                       className={`flex flex-col ${ m.playerId === localPlayer.id ? 'items-end' : 'items-start' }`}>
                       <span className="text-xs text-gray-500 mb-1">{m.playerName}</span>
-                      <div className={`px-3 py-2 rounded-lg text-sm max-w-[80%] ${
-                        m.playerId === localPlayer.id ? 'bg-green-600/20 text-green-100' : 'bg-white/10 text-gray-200'
-                      }`}>
+                      <div className={`px-3 py-2 rounded-lg text-sm max-w-[80%] ${ m.playerId === localPlayer.id ? 'bg-green-600/20 text-green-100' : 'bg-white/10 text-gray-200' }`}>
                         {m.message}
                       </div>
                     </motion.div>
@@ -191,8 +185,7 @@ export default function Lobby() {
                   onKeyDown={e => e.key === 'Enter' && sendChat()}
                   placeholder="Type a message..."
                   className="flex-1 bg-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 border border-white/10 focus:outline-none focus:border-green-500/50" />
-                <button onClick={sendChat} className="p-2 rounded-lg transition-colors"
-                  style={{ background: 'var(--green-primary)' }}>
+                <button onClick={sendChat} className="p-2 rounded-lg transition-colors" style={{ background: 'var(--green-primary)' }}>
                   <Send size={16} className="text-white" />
                 </button>
               </div>
