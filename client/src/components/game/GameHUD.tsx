@@ -11,6 +11,7 @@ interface Props {
   player1Break: number;
   player2Break: number;
   currentPlayer: 0 | 1;
+  localPlayerIdx: 0 | 1;
   frame: number;
   objective: string;
   shotPower: number;
@@ -36,7 +37,8 @@ export default function GameHUD({
   player1Name, player2Name,
   player1Score, player2Score,
   player1Break, player2Break,
-  currentPlayer, frame, objective,
+  currentPlayer, localPlayerIdx,
+  frame, objective,
   shotPower, spinX, spinY,
   remainingBalls,
   onPause, onForfeit, onToggleAimLine, showAimLine,
@@ -62,6 +64,12 @@ export default function GameHUD({
     padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px',
   };
 
+  // Turn label from this client's perspective
+  const turnLabelFor = (playerIdx: 0 | 1): string | null => {
+    if (currentPlayer !== playerIdx) return null;
+    return playerIdx === localPlayerIdx ? '● YOUR TURN' : '● THEIR TURN';
+  };
+
   return (
     <>
       {/* TOP BAR */}
@@ -76,7 +84,7 @@ export default function GameHUD({
             <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 900, fontSize: '28px', color: currentPlayer === 0 ? '#22c55e' : '#f0f0f0', lineHeight: 1 }}>{player1Score}</span>
             {player1Break > 0 && <span style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '11px', color: '#d4af37' }}>Break: {player1Break}</span>}
           </div>
-          {currentPlayer === 0 && <div style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '10px', color: '#22c55e', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>● YOUR TURN</div>}
+          {turnLabelFor(0) && <div style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '10px', color: '#22c55e', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{turnLabelFor(0)}</div>}
         </motion.div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
@@ -113,7 +121,7 @@ export default function GameHUD({
             {player2Break > 0 && <span style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '11px', color: '#d4af37' }}>Break: {player2Break}</span>}
             <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 900, fontSize: '28px', color: currentPlayer === 1 ? '#22c55e' : '#f0f0f0', lineHeight: 1 }}>{player2Score}</span>
           </div>
-          {currentPlayer === 1 && <div style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '10px', color: '#22c55e', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>● THEIR TURN</div>}
+          {turnLabelFor(1) && <div style={{ fontFamily: 'Rajdhani,sans-serif', fontSize: '10px', color: '#22c55e', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px', textAlign: 'right' }}>{turnLabelFor(1)}</div>}
         </motion.div>
       </div>
 

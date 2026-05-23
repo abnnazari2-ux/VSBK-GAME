@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Copy, Check, Users, Clock, Target, Layers, ChevronRight, ArrowLeft } from 'lucide-react';
@@ -26,6 +26,11 @@ export default function CreateRoom() {
 
   const roomCode = currentRoom?.code;
 
+  // Navigate to lobby once the server confirms room creation
+  useEffect(() => {
+    if (currentRoom && creating) navigate('/lobby');
+  }, [currentRoom, creating, navigate]);
+
   const handleCreate = () => {
     setCreating(true);
     createRoom({
@@ -41,7 +46,6 @@ export default function CreateRoom() {
         allowSpectators,
       },
     });
-    setTimeout(() => navigate('/lobby'), 800);
   };
 
   const copyCode = () => {
@@ -57,7 +61,7 @@ export default function CreateRoom() {
       <TopNav />
       <div className="pt-20 px-6 pb-10 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <button onClick={() => navigate('/match-setup')} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+          <button onClick={() => navigate('/play')} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
             <ArrowLeft size={18} /> Back to Match Setup
           </button>
           <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Rajdhani', color: 'var(--gold-primary)' }}>Create Private Room</h1>
@@ -165,7 +169,7 @@ export default function CreateRoom() {
               <GoldButton onClick={handleCreate} loading={creating} className="w-full" size="lg">
                 <ChevronRight size={18} /> Create Room
               </GoldButton>
-              <GreenButton onClick={() => navigate('/match-setup')} outlined className="w-full" size="md">
+              <GreenButton onClick={() => navigate('/play')} outlined className="w-full" size="md">
                 Cancel
               </GreenButton>
             </div>

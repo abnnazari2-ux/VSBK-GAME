@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Gift, Mail, Bell, Trophy, Settings } from 'lucide-react';
+import { Gift, Mail, Bell, Trophy } from 'lucide-react';
+import { useGameStore } from '../../stores/gameStore';
 
 const NAV_ITEMS = [
   { label: 'HOME',         path: '/' },
@@ -15,7 +16,10 @@ const NAV_ITEMS = [
 
 export default function TopNav() {
   const { pathname } = useLocation();
+  const { localPlayer } = useGameStore();
   const [hovered, setHovered] = useState<string | null>(null);
+
+  const initial = localPlayer.name.charAt(0).toUpperCase();
 
   function isActive(path: string) {
     if (path === '/') return pathname === '/';
@@ -26,9 +30,7 @@ export default function TopNav() {
     <header
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
+        top: 0, left: 0, right: 0,
         zIndex: 200,
         height: '60px',
         display: 'flex',
@@ -43,16 +45,7 @@ export default function TopNav() {
     >
       {/* Logo */}
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-        <div
-          style={{
-            width: '34px', height: '34px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1a7a3c, #0a0a0f)',
-            border: '2px solid rgba(212,175,55,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 12px rgba(212,175,55,0.3)',
-            flexShrink: 0,
-          }}
-        >
+        <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #1a7a3c, #0a0a0f)', border: '2px solid rgba(212,175,55,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 12px rgba(212,175,55,0.3)', flexShrink: 0 }}>
           <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 900, fontSize: '16px', color: '#d4af37' }}>8</span>
         </div>
         <div>
@@ -75,19 +68,7 @@ export default function TopNav() {
               to={item.path}
               onMouseEnter={() => setHovered(item.label)}
               onMouseLeave={() => setHovered(null)}
-              style={{
-                fontFamily: 'Rajdhani,sans-serif',
-                fontWeight: 700,
-                fontSize: '11px',
-                letterSpacing: '0.08em',
-                color: active ? '#d4af37' : isHovered ? '#f0f0f0' : '#6b7280',
-                textDecoration: 'none',
-                padding: '6px 10px',
-                borderRadius: '6px',
-                borderBottom: active ? '2px solid #22c55e' : '2px solid transparent',
-                transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-              }}
+              style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 700, fontSize: '11px', letterSpacing: '0.08em', color: active ? '#d4af37' : isHovered ? '#f0f0f0' : '#6b7280', textDecoration: 'none', padding: '6px 10px', borderRadius: '6px', borderBottom: active ? '2px solid #22c55e' : '2px solid transparent', transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}
             >
               {item.label}
             </Link>
@@ -97,41 +78,23 @@ export default function TopNav() {
 
       {/* Right Section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-        {/* Gift */}
         <button style={buttonStyle}><Gift size={16} color="#6b7280" /></button>
-
-        {/* Mail with badge */}
         <div style={{ position: 'relative' }}>
           <button style={buttonStyle}><Mail size={16} color="#6b7280" /></button>
           <span style={badgeStyle}>3</span>
         </div>
-
-        {/* Bell with green dot */}
         <div style={{ position: 'relative' }}>
           <button style={buttonStyle}><Bell size={16} color="#6b7280" /></button>
           <span style={{ position: 'absolute', top: '6px', right: '6px', width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', border: '1px solid #0a0a0f' }} />
         </div>
-
         <div style={{ width: '1px', height: '24px', background: 'rgba(212,175,55,0.2)', margin: '0 4px' }} />
-
-        {/* Coins */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <Trophy size={13} color="#d4af37" />
           <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 700, fontSize: '13px', color: '#d4af37' }}>125,630</span>
         </div>
-
-        {/* Avatar */}
         <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-          <div
-            style={{
-              width: '34px', height: '34px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #d4af37, #9a7d2b)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid rgba(212,175,55,0.4)',
-              flexShrink: 0,
-            }}
-          >
-            <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 800, fontSize: '14px', color: '#0a0a0f' }}>C</span>
+          <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #d4af37, #9a7d2b)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(212,175,55,0.4)', flexShrink: 0 }}>
+            <span style={{ fontFamily: 'Rajdhani,sans-serif', fontWeight: 800, fontSize: '14px', color: '#0a0a0f' }}>{initial}</span>
           </div>
         </Link>
       </div>

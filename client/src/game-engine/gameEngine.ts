@@ -139,11 +139,21 @@ export function processShotResult(state: EngineState, pottedBalls: Ball[]): Engi
   if (next.phase === 'color') {
     const pottedColors = pottedBalls.filter(b => COLOR_ORDER.includes(b.type));
     const redsLeft = countReds(next.balls);
+
     if (pottedColors.length === 0) {
+      // Missed — switch player; keep 'color' phase when no reds remain
       next.currentBreaks[cp] = 0;
       next.currentPlayer = op;
-      next.phase = 'red';
-      next.turnMessage = `${next.playerNames[op]}'s turn — pot a red`;
+      if (redsLeft > 0) {
+        next.phase = 'red';
+        next.turnMessage = `${next.playerNames[op]}'s turn — pot a red`;
+      } else {
+        const remaining = COLOR_ORDER.filter(ct => { const b = next.balls.find(bl => bl.type === ct); return b && !b.potted; });
+        next.phase = 'color';
+        next.turnMessage = remaining.length > 0
+          ? `${next.playerNames[op]}'s turn — pot the ${remaining[0]}`
+          : `${next.playerNames[op]}'s turn`;
+      }
     } else {
       const colorBall = pottedColors[0];
       if (redsLeft > 0) {

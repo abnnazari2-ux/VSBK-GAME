@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ChevronRight, Trophy, Shield, Target, Pen } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Shield } from 'lucide-react';
 import TopNav from '../components/layout/TopNav';
+import { useGameStore } from '../stores/gameStore';
 
 type Mode = 'ranked' | 'casual' | 'practice' | 'custom';
 type Frames = 3 | 5 | 7;
@@ -12,6 +13,7 @@ type Stake = 0 | 100 | 500 | 1000;
 
 export default function MatchSetup() {
   const navigate = useNavigate();
+  const { localPlayer } = useGameStore();
   const S: React.CSSProperties = { fontFamily: 'Rajdhani,sans-serif' };
   const [mode, setMode] = useState<Mode>('ranked');
   const [frames, setFrames] = useState<Frames>(5);
@@ -27,6 +29,8 @@ export default function MatchSetup() {
   );
 
   const panel: React.CSSProperties = { background: 'rgba(17,17,24,0.9)', border: '1px solid rgba(212,175,55,0.18)', borderRadius: 12, padding: '16px 20px' };
+
+  const initial = localPlayer.name.charAt(0).toUpperCase();
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', paddingTop: 60 }}>
@@ -46,10 +50,10 @@ export default function MatchSetup() {
           {/* Game mode cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
             {[
-              { key: 'ranked', icon: '🛡️', title: 'RANKED MATCH', sub: 'Compete for rank and climb the ladder' },
-              { key: 'casual', icon: '🏆', title: 'CASUAL MATCH', sub: 'Play for fun with no rank changes' },
-              { key: 'practice', icon: '🎱', title: 'PRACTICE', sub: 'Hone your skills offline or vs AI' },
-              { key: 'custom', icon: '✂️', title: 'CUSTOM RULES', sub: 'Create your own match with custom settings' },
+              { key: 'ranked',   icon: '🛡️', title: 'RANKED MATCH',  sub: 'Compete for rank and climb the ladder' },
+              { key: 'casual',   icon: '🏆', title: 'CASUAL MATCH',  sub: 'Play for fun with no rank changes' },
+              { key: 'practice', icon: '🎱', title: 'PRACTICE',      sub: 'Hone your skills offline or vs AI' },
+              { key: 'custom',   icon: '✂️', title: 'CUSTOM RULES',  sub: 'Create your own match with custom settings' },
             ].map(m => (
               <motion.div key={m.key} whileHover={{ scale: 1.02 }} onClick={() => setMode(m.key as Mode)}
                 style={{ background: mode === m.key ? 'rgba(26,122,60,0.15)' : 'rgba(17,17,24,0.9)', border: mode === m.key ? '2px solid #22c55e' : '1px solid rgba(212,175,55,0.18)', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'center', position: 'relative' }}>
@@ -61,17 +65,17 @@ export default function MatchSetup() {
             ))}
           </div>
 
-          {/* Players section */}
+          {/* Players */}
           <div style={{ ...panel }}>
             <p style={{ ...S, fontWeight: 800, fontSize: 13, color: '#d4af37', letterSpacing: '0.1em', marginBottom: 16, textTransform: 'uppercase' }}>PLAYERS</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.25)', borderRadius: 10, padding: '14px 16px' }}>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg,#d4af37,#9a7d2b)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(212,175,55,0.5)', flexShrink: 0 }}>
-                  <span style={{ ...S, fontWeight: 900, fontSize: 20, color: '#0a0a0f' }}>C</span>
+                  <span style={{ ...S, fontWeight: 900, fontSize: 20, color: '#0a0a0f' }}>{initial}</span>
                 </div>
                 <div>
-                  <div style={{ ...S, fontWeight: 800, fontSize: 16, color: '#d4af37' }}>CHALKMASTER</div>
-                  <div style={{ ...S, fontSize: 12, color: '#22c55e' }}>GRAND MASTER</div>
+                  <div style={{ ...S, fontWeight: 800, fontSize: 16, color: '#d4af37' }}>{localPlayer.name}</div>
+                  <div style={{ ...S, fontSize: 12, color: '#22c55e' }}>{localPlayer.rank.toUpperCase()}</div>
                 </div>
               </div>
               <div style={{ ...S, fontWeight: 900, fontSize: 22, color: '#d4af37' }}>VS</div>
@@ -91,9 +95,9 @@ export default function MatchSetup() {
                 <div><div style={{ ...S, fontWeight: 700, fontSize: 13, color: '#22c55e' }}>MATCHMAKING</div><div style={{ ...S, fontSize: 11, color: '#6b7280' }}>Find a suitable opponent</div></div>
               </div>
               <div style={{ ...S, fontWeight: 600, fontSize: 13, color: '#6b7280', alignSelf: 'center', padding: '0 8px' }}>OR</div>
-              <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <div onClick={() => navigate('/room')} style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <span style={{ fontSize: 16 }}>➕</span>
-                <div><div style={{ ...S, fontWeight: 700, fontSize: 13, color: '#f0f0f0' }}>INVITE A FRIEND</div><div style={{ ...S, fontSize: 11, color: '#6b7280' }}>Invite online friend to play</div></div>
+                <div><div style={{ ...S, fontWeight: 700, fontSize: 13, color: '#f0f0f0' }}>INVITE A FRIEND</div><div style={{ ...S, fontSize: 11, color: '#6b7280' }}>Create a private room</div></div>
               </div>
             </div>
           </div>
@@ -102,19 +106,16 @@ export default function MatchSetup() {
           <div style={{ ...panel }}>
             <p style={{ ...S, fontWeight: 800, fontSize: 13, color: '#d4af37', letterSpacing: '0.1em', marginBottom: 14, textTransform: 'uppercase' }}>MATCH RULES</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Frames */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...S, fontWeight: 600, fontSize: 12, color: '#9ca3af', width: 120, textTransform: 'uppercase' }}>Frames</span>
                 <div style={{ display: 'flex', gap: 6 }}>{([3, 5, 7] as Frames[]).map(f => pill(frames === f, `Best of ${f}`, () => setFrames(f)))}</div>
               </div>
-              {/* Shot timer */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...S, fontWeight: 600, fontSize: 12, color: '#9ca3af', width: 120, textTransform: 'uppercase' }}>Shot Timer</span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {([0, 20, 30, 45] as Timer[]).map(t => pill(timer === t, t === 0 ? 'OFF' : `${t} Sec`, () => setTimer(t)))}
                 </div>
               </div>
-              {/* Table theme */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...S, fontWeight: 600, fontSize: 12, color: '#9ca3af', width: 120, textTransform: 'uppercase' }}>Table Theme</span>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -123,14 +124,12 @@ export default function MatchSetup() {
                   ))}
                 </div>
               </div>
-              {/* Cue restrictions */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...S, fontWeight: 600, fontSize: 12, color: '#9ca3af', width: 120, textTransform: 'uppercase' }}>Cue Rules</span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {(['none', 'one', 'house'] as const).map(c => pill(cue === c, c === 'none' ? 'No Restrictions' : c === 'one' ? 'One Cue' : 'House Cues', () => setCue(c)))}
                 </div>
               </div>
-              {/* Stake */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...S, fontWeight: 600, fontSize: 12, color: '#9ca3af', width: 120, textTransform: 'uppercase' }}>Stake</span>
                 <div style={{ display: 'flex', gap: 6 }}>

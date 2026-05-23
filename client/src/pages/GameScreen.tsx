@@ -18,7 +18,6 @@ export default function GameScreen() {
   const ballsRef = useRef<Ball[]>([]);
   const engineRef = useRef<EngineState | null>(null);
 
-  // Which slot are we? 0 = host, 1 = guest
   const localPlayerIdx = useMemo<0 | 1>(() => {
     if (!currentRoom?.players || !socketId) return 0;
     const idx = currentRoom.players.findIndex(p => p.id === socketId);
@@ -50,7 +49,7 @@ export default function GameScreen() {
 
   const getCueBall = () => ballsRef.current.find(b => b.type === 'cue' && !b.potted);
 
-  // ── DRAW ───────────────────────────────────────────────────────────────────
+  // ── DRAW ──────────────────────────────────────────────────────────────────
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -128,7 +127,7 @@ export default function GameScreen() {
     }
   }, [aimAngle, shotPower, showAimLine, localPlayerIdx]);
 
-  // ── POST-SHOT LOGIC via ref — avoids stale closures in rAF ────────────────
+  // ── POST-SHOT LOGIC via ref — avoids stale closures in rAF ──────────────
   const onShotEndRef = useRef<(potted: Ball[]) => void>(() => {});
   onShotEndRef.current = (pottedBalls: Ball[]) => {
     const result = processShotResult(
@@ -162,7 +161,7 @@ export default function GameScreen() {
     }
   };
 
-  // ── ANIMATION LOOP ─────────────────────────────────────────────────────────
+  // ── ANIMATION LOOP ────────────────────────────────────────────────────────
   const animate = useCallback(() => {
     updatePhysics(ballsRef.current);
     draw();
@@ -173,7 +172,7 @@ export default function GameScreen() {
     }
   }, [draw]);
 
-  // ── MOUSE EVENTS ───────────────────────────────────────────────────────────
+  // ── MOUSE EVENTS ─────────────────────────────────────────────────────────
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (engineRef.current?.isAnimating) return;
     if (isMultiplayer && engineRef.current && engineRef.current.currentPlayer !== localPlayerIdx) return;
@@ -200,7 +199,7 @@ export default function GameScreen() {
     animRef.current = requestAnimationFrame(animate);
   }, [aimAngle, shotPower, animate, currentRoom, isMultiplayer, localPlayerIdx, takeShot]);
 
-  // ── OPPONENT SHOT LISTENER ─────────────────────────────────────────────────
+  // ── OPPONENT SHOT LISTENER ───────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: Event) => {
       if (!isMultiplayer) return;
@@ -217,7 +216,7 @@ export default function GameScreen() {
     return () => window.removeEventListener('snooker:shot_broadcast', handler);
   }, [animate, isMultiplayer]);
 
-  // ── OPPONENT MATCH-END LISTENER (so opponent also navigates to /results) ──
+  // ── OPPONENT MATCH-END LISTENER ──────────────────────────────────────────
   useEffect(() => {
     if (!isMultiplayer) return;
     const handler = () => setTimeout(() => navigate('/results'), 1800);
@@ -225,7 +224,7 @@ export default function GameScreen() {
     return () => window.removeEventListener('snooker:match_ended', handler);
   }, [isMultiplayer, navigate]);
 
-  // ── SIDE EFFECTS ───────────────────────────────────────────────────────────
+  // ── SIDE EFFECTS ─────────────────────────────────────────────────────────
   useEffect(() => { draw(); }, [draw]);
   useEffect(() => () => cancelAnimationFrame(animRef.current), []);
 
@@ -257,6 +256,7 @@ export default function GameScreen() {
         player1Break={engineState.currentBreaks[0]}
         player2Break={engineState.currentBreaks[1]}
         currentPlayer={engineState.currentPlayer}
+        localPlayerIdx={localPlayerIdx}
         frame={frame}
         objective={objective}
         shotPower={shotPower}
@@ -330,7 +330,7 @@ export default function GameScreen() {
               <h2 style={{ fontFamily: 'Playfair Display,serif', fontWeight: 700, fontSize: 24, color: '#d4af37', marginBottom: 24 }}>GAME PAUSED</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { label: 'RESUME', bg: 'linear-gradient(135deg,#1a5c32,#22c55e)', color: '#fff', onClick: () => setIsPaused(false) },
+                  { label: 'RESUME',  bg: 'linear-gradient(135deg,#1a5c32,#22c55e)', color: '#fff', onClick: () => setIsPaused(false) },
                   { label: 'RESTART', bg: 'rgba(255,255,255,0.05)', color: '#f0f0f0', onClick: () => { const s = createEngineState(p1Name, p2Name); ballsRef.current = s.balls.map(b => ({ ...b })); engineRef.current = s; setEngineState(s); setIsPaused(false); setTimer(30); setWaitingForOpponent(false); } },
                   { label: 'FORFEIT', bg: 'rgba(127,29,29,0.7)', color: '#fca5a5', onClick: () => navigate('/results') },
                 ].map(b => (
